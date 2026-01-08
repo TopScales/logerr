@@ -86,7 +86,7 @@ func try_resize(err: int, module: String = "") -> void:
 
 
 func try_append(arg: bool, module: String = "") -> void:
-	if not arg:
+	if arg:
 		var msg: String = "Impossible to append element to array."
 		Log.error(msg, module)
 
