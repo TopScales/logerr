@@ -199,7 +199,7 @@ func fatal(message: String, module: String = "") -> void:
 #endregion
 
 # =============================================================
-# ========= Callbacks =========================================
+# ========= Built-in Functions ================================
 #region Callbacks
 
 func _ready() -> void:
