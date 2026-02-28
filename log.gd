@@ -283,9 +283,11 @@ static func __get_logs_path() -> void:
 	if log_path.get_extension().is_empty():
 		_log_dir = log_path
 		_log_file_template = "{time}.%s" % _LOG_EXTENSION
+		_log_extension = _LOG_EXTENSION
 	else:
 		_log_dir = log_path.get_base_dir()
 		_log_file_template = log_path.get_file().format({"ext": _LOG_EXTENSION})
+		_log_extension = log_path.get_extension()
 
 
 static func __create_log_file() -> FileAccess:
@@ -318,7 +320,7 @@ static func __remove_old_log_files() -> void:
 		elif file.get_extension() == _log_extension:
 			log_file_paths.push_back(_log_dir.path_join(file))
 
-	while log_file_paths.size() > max_log_files:
+	while log_file_paths.size() >= max_log_files:
 		var path: String = log_file_paths.pop_front()
 		var err: int = DirAccess.remove_absolute(path)
 
