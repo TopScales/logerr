@@ -119,14 +119,14 @@ func fail_err(err: int, err_message: String = "", module: StringName = "", warni
 ## Use this function when resizing an [Array].
 func try_resize(err: int, module: StringName = "") -> void:
 	if err != OK:
-		var msg: String = "Impossible to resize array (%s)." % error_string(err)
+		var msg: String = "Failed to resize array (%s)." % error_string(err)
 		Log.error(msg, module)
 
 
 ## Use this function when pushing elements to packed arrays.
 func try_append(arg: bool, module: StringName = "") -> void:
 	if arg:
-		var msg: String = "Impossible to append element to array."
+		var msg: String = "Failed to append element to array."
 		Log.error(msg, module)
 
 
@@ -135,7 +135,7 @@ func conn(signal_: Signal, callable: Callable, flags: int = 0, module: StringNam
 	var err: int = signal_.connect(callable, flags)
 
 	if err != OK:
-		var msg: String = "Impossible to connect signal %s to method %s." % [signal_.get_name(), callable.get_method()]
+		var msg: String = "Failed to connect signal %s to method %s." % [signal_.get_name(), callable.get_method()]
 		Log.error(msg, module)
 
 
