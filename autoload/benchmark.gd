@@ -8,6 +8,7 @@
 @tool
 extends Node
 
+
 class BenchmarkData:
 	var running: bool = false
 	var current_time: int = 0
@@ -18,6 +19,7 @@ class BenchmarkData:
 		current_time = 0
 		last_tick = -1
 
+
 const _MODULE: StringName = &"Benchmark"
 const _DEFAULT_BENCHMARK: StringName = &"Default"
 
@@ -25,7 +27,6 @@ var _benchmarks: Dictionary[StringName, BenchmarkData] = {}
 var _def_benchmark: BenchmarkData = BenchmarkData.new()
 var _cached_benchmark: BenchmarkData
 var _cached: StringName
-
 
 # =============================================================
 # ========= Public Functions ==================================
@@ -79,13 +80,12 @@ func pause(benchmark: StringName = &"") -> void:
 # =============================================================
 # ========= Built-in Functions ================================
 
-
 # =============================================================
 # ========= Virtual Methods ===================================
 
-
 # =============================================================
 # ========= Private Functions =================================
+
 
 func __get_benchmark(benchmark: StringName) -> BenchmarkData:
 	if benchmark.is_empty():

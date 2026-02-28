@@ -15,10 +15,8 @@ const _DEFAULT_WARNING_MSG: String = "Issue detected."
 
 ## Notifications that will trigger a log file flush.
 const LOG_FLUSH_NOTIFICATIONS: PackedInt32Array = [
-		NOTIFICATION_WM_CLOSE_REQUEST,
-		NOTIFICATION_WM_GO_BACK_REQUEST,
-		NOTIFICATION_APPLICATION_FOCUS_OUT
-	]
+	NOTIFICATION_WM_CLOSE_REQUEST, NOTIFICATION_WM_GO_BACK_REQUEST, NOTIFICATION_APPLICATION_FOCUS_OUT
+]
 
 # =============================================================
 # ========= Public Functions ==================================
@@ -130,12 +128,12 @@ func try_append(arg: bool, module: StringName = "") -> void:
 		Log.error(msg, module)
 
 
-## Helper function to connect a [param signal_] to a [param callabale].
-func conn(signal_: Signal, callable: Callable, flags: int = 0, module: StringName = "") -> void:
-	var err: int = signal_.connect(callable, flags)
+## Helper function to connect a [param _signal] to a [param callabale].
+func conn(_signal: Signal, callable: Callable, flags: int = 0, module: StringName = "") -> void:
+	var err: int = _signal.connect(callable, flags)
 
 	if err != OK:
-		var msg: String = "Failed to connect signal %s to method %s." % [signal_.get_name(), callable.get_method()]
+		var msg: String = "Failed to connect signal %s to method %s." % [_signal.get_name(), callable.get_method()]
 		Log.error(msg, module)
 
 
@@ -144,6 +142,7 @@ func try_erase(arg: bool, module: String = "") -> void:
 	if not arg:
 		var msg: String = "Element not found while trying to make an erase operation."
 		Log.warning(msg, module)
+
 
 #endregion
 
@@ -155,16 +154,16 @@ func _notification(what: int) -> void:
 	if what in LOG_FLUSH_NOTIFICATIONS:
 		Log.force_flush()
 
+
 # =============================================================
 # ========= Virtual Methods ===================================
-
 
 # =============================================================
 # ========= Private Functions =================================
 
+
 func __get_err_string(err: int) -> String:
 	return "%s (%d)" % [error_string(err), err]
-
 
 # =============================================================
 # ========= Signal Callbacks ==================================

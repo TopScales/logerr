@@ -22,17 +22,19 @@
 class_name Log
 extends Logger
 
+
 class LevelParams:
 	var tag: String
 	var tag_color: String
 	var text_color: String
 
-	func _init(tag_: String, tag_color_: Color, text_color_: Color) -> void:
-		tag = tag_
-		tag_color = tag_color_.to_html(false)
-		text_color = text_color_.to_html(false)
+	func _init(_tag: String, _tag_color: Color, _text_color: Color) -> void:
+		tag = _tag
+		tag_color = _tag_color.to_html(false)
+		text_color = _text_color.to_html(false)
 
-enum Level { VERBOSE, DEBUG, INFO, WARNING, ERROR, CRITICAL, MUTED, FORCE_FLUSH }
+
+enum Level {VERBOSE, DEBUG, INFO, WARNING, ERROR, CRITICAL, MUTED, FORCE_FLUSH}
 
 const SETTINGS_PREFIX: String = "addons/logerr/"
 
@@ -55,12 +57,7 @@ const _DEF_ERROR_TXT_COLOR: Color = Color.CRIMSON
 const _DEF_CRITICAL_TAG_COLOR: Color = Color.RED
 const _DEF_CRITICAL_TXT_COLOR: Color = Color.CRIMSON
 const _MODULE: StringName = &"Log"
-const _PLATFORMS: PackedStringArray = [
-	"pc",
-	"android",
-	"ios",
-	"web"
-]
+const _PLATFORMS: PackedStringArray = ["pc", "android", "ios", "web"]
 
 #region Private Variables
 static var _level_strings: PackedStringArray = Level.keys()
@@ -81,6 +78,7 @@ static var _enable_file_logging: bool
 
 # =============================================================
 # ========= Public Functions ==================================
+
 
 ## Sets the RichTextLabel control to be used as console output.
 static func set_console(console: RichTextLabel) -> void:
@@ -141,8 +139,8 @@ static func error(message: String, module: StringName = &"", err: int = -1) -> v
 	var messages: Array[String] = __format_log_message(message, _level_params[level], module)
 	var script_backtraces: Array[ScriptBacktrace] = Engine.capture_script_backtraces()
 	var backtrace: String = __get_gdscript_backtrace(script_backtraces, true)
-	__add_message_to_file(messages[0] + '\n' + backtrace, level)
-	var pmessage: String = messages[1] + '\n' + backtrace if _print_backtrace else messages[1]
+	__add_message_to_file(messages[0] + "\n" + backtrace, level)
+	var pmessage: String = messages[1] + "\n" + backtrace if _print_backtrace else messages[1]
 	__print_message(pmessage)
 
 
@@ -156,8 +154,8 @@ static func critical(message: String, module: StringName = &"", err: int = -1) -
 	var messages: Array[String] = __format_log_message(message, _level_params[level], module)
 	var script_backtraces: Array[ScriptBacktrace] = Engine.capture_script_backtraces()
 	var backtrace: String = __get_gdscript_backtrace(script_backtraces, true)
-	__add_message_to_file(messages[0] + '\n' + backtrace, level)
-	var pmessage: String = messages[1] + '\n' + backtrace if _print_backtrace else messages[1]
+	__add_message_to_file(messages[0] + "\n" + backtrace, level)
+	var pmessage: String = messages[1] + "\n" + backtrace if _print_backtrace else messages[1]
 	__print_message(pmessage)
 
 
@@ -192,22 +190,36 @@ static func _static_init() -> void:
 		printerr("Failed to open the log file.")
 
 
-func _log_error(function: String, file: String, line: int, code: String, rationale: String, _editor_notify: bool, error_type: int, script_backtraces: Array[ScriptBacktrace]) -> void:
+func _log_error(
+	function: String,
+	file: String,
+	line: int,
+	code: String,
+	rationale: String,
+	_editor_notify: bool,
+	error_type: int,
+	script_backtraces: Array[ScriptBacktrace]
+) -> void:
 	if not _is_valid:
 		return
 
 	var level: Level = Level.WARNING if error_type == ERROR_TYPE_WARNING else Level.ERROR
-	var message := "[{time}] {level}: {rationale}\n{code}\n{file}:{line} @ {function}()".format({
-		"time": Time.get_time_string_from_system(),
-		"level": _level_strings[level],
-		"rationale": rationale,
-		"code": code,
-		"file": file,
-		"line": line,
-		"function": function,
- 	})
+	var message := (
+		"[{time}] {level}: {rationale}\n{code}\n{file}:{line} @ {function}()"
+		.format(
+			{
+				"time": Time.get_time_string_from_system(),
+				"level": _level_strings[level],
+				"rationale": rationale,
+				"code": code,
+				"file": file,
+				"line": line,
+				"function": function,
+			}
+		)
+	)
 	if level == Level.ERROR:
-		message += '\n' + __get_gdscript_backtrace(script_backtraces)
+		message += "\n" + __get_gdscript_backtrace(script_backtraces)
 	__add_message_to_file(message, level)
 
 
@@ -216,11 +228,9 @@ func _log_message(message: String, log_message_error: bool) -> void:
 		return
 
 	var level: Level = Level.ERROR if log_message_error else Level.INFO
-	message = "[{time}] {level}: {message}".format({
-		"time": Time.get_time_string_from_system(),
-		"level": _level_strings[level],
-		"message": message
-	})
+	message = "[{time}] {level}: {message}".format(
+		{"time": Time.get_time_string_from_system(), "level": _level_strings[level], "message": message}
+	)
 	__add_message_to_file(message, level)
 
 
@@ -252,7 +262,9 @@ static func __get_settings() -> void:
 	_level = ProjectSettings.get_setting(SETTINGS_PREFIX + "output_level", Level.DEBUG)
 	@warning_ignore("return_value_discarded")
 	_level_params.resize(Level.CRITICAL + 1)
-	var text_color: Color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/verbose_text_color", _DEF_VERBOSE_TXT_COLOR)
+	var text_color: Color = ProjectSettings.get_setting(
+		SETTINGS_PREFIX + "colors/verbose_text_color", _DEF_VERBOSE_TXT_COLOR
+	)
 	var verbosep: LevelParams = LevelParams.new(_level_strings[Level.VERBOSE], Color.BLACK, text_color)
 	_level_params[Level.VERBOSE] = verbosep
 	var tag_color: Color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/debug_tag_color", _DEF_DEBUG_TAG_COLOR)
@@ -291,10 +303,9 @@ static func __get_logs_path() -> void:
 
 
 static func __create_log_file() -> FileAccess:
-	var file_path: String = _log_file_template.format({
-		"time": Time.get_datetime_string_from_system().replace(":", "."),
-		"ext": _LOG_EXTENSION
-	})
+	var file_path: String = _log_file_template.format(
+		{"time": Time.get_datetime_string_from_system().replace(":", "."), "ext": _LOG_EXTENSION}
+	)
 	var file: FileAccess = FileAccess.open(_log_dir.path_join(file_path), FileAccess.WRITE)
 	return file
 
@@ -309,7 +320,9 @@ static func __remove_old_log_files() -> void:
 	for file in DirAccess.get_files_at(_log_dir):
 		if file == _log_file_template:
 			var base: String = file.get_basename()
-			var new_name: String = "%s%s.%s" % [_log_dir.path_join(base), Time.get_time_string_from_system(), file.get_extension()]
+			var new_name: String = (
+				"%s%s.%s" % [_log_dir.path_join(base), Time.get_time_string_from_system(), file.get_extension()]
+			)
 			var full_file_name: String = _log_dir.path_join(file)
 			var err: int = DirAccess.rename_absolute(full_file_name, new_name)
 			if err == OK:
@@ -328,9 +341,12 @@ static func __remove_old_log_files() -> void:
 			error("Failed to clean up old log: " + path, _MODULE, err)
 
 
-static func __get_gdscript_backtrace(script_backtraces: Array[ScriptBacktrace], remove_last_call: bool = false) -> String:
-	var gdscript: int = script_backtraces.find_custom(func(backtrace: ScriptBacktrace) -> bool:
-		return backtrace.get_language_name() == "GDScript")
+static func __get_gdscript_backtrace(
+	script_backtraces: Array[ScriptBacktrace], remove_last_call: bool = false
+) -> String:
+	var gdscript: int = script_backtraces.find_custom(
+		func(backtrace: ScriptBacktrace) -> bool: return backtrace.get_language_name() == "GDScript"
+	)
 	if gdscript == -1:
 		return "Backtrace N/A"
 	else:
@@ -364,13 +380,20 @@ static func __add_message_to_file(message: String, level: Level) -> void:
 	_mutex.unlock()
 
 
-static func __format_log_message(message: String, level_params: LevelParams, module: StringName, show_tag: bool = true) -> Array[String]:
-	var module_str: String = "" if module.is_empty() else " [color=#%s]%s:[/color]" % [__get_module_color(module), module]
+static func __format_log_message(
+	message: String, level_params: LevelParams, module: StringName, show_tag: bool = true
+) -> Array[String]:
+	var module_str: String = (
+		"" if module.is_empty() else " [color=#%s]%s:[/color]" % [__get_module_color(module), module]
+	)
 	var module_str_raw: String = "" if module.is_empty() else " %s:" % module
 	var level_str: String = " [color=#%s]%s:[/color]" % [level_params.tag_color, level_params.tag] if show_tag else ""
 	var level_str_raw: String = "" if show_tag else " %s:" % level_params.tag
 	var time: String = Time.get_time_string_from_system()
-	var str_formatted: String = "[lang=tlh][lb]%s[rb][/lang]%s%s [color=#%s]%s[/color]" % [time, module_str, level_str, level_params.text_color, message]
+	var str_formatted: String = (
+		"[lang=tlh][lb]%s[rb][/lang]%s%s [color=#%s]%s[/color]"
+		% [time, module_str, level_str, level_params.text_color, message]
+	)
 	var str_raw = "[%s]%s%s %s" % [time, module_str_raw, level_str_raw, message]
 	return [str_raw, str_formatted]
 
@@ -394,7 +417,6 @@ static func __module_to_color(module: StringName) -> Color:
 	var sat: float = 0.6 + 0.4 * float(sat_index) / 15.0
 	var val: float = 0.65 + 0.35 * float(val_index) / 15.0
 	return Color.from_hsv(hue, sat, val)
-
 
 # =============================================================
 # ========= Signal Callbacks ==================================
