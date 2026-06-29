@@ -128,12 +128,19 @@ func try_append(arg: bool, module: StringName = "") -> void:
 		Log.error(msg, module)
 
 
+## Use this function when adding elements to an array.
+func try_insert(err: int, module: StringName = "") -> void:
+	if err != OK:
+		var msg: String = "Failed to insert element to array."
+		Log.error(msg, module)
+
+
 ## Helper function to connect a [param _signal] to a [param callabale].
 func conn(_signal: Signal, callable: Callable, flags: int = 0, module: StringName = "") -> void:
 	var err: int = _signal.connect(callable, flags)
 
 	if err != OK:
-		var msg: String = "Failed to connect signal %s to method %s." % [_signal.get_name(), callable.get_method()]
+		var msg: String = "Failed to connect signal '%s' to method '%s'." % [_signal.get_name(), callable.get_method()]
 		Log.error(msg, module)
 
 
