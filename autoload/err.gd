@@ -53,12 +53,12 @@ func success(arg: bool, err_message: String = "", module: StringName = "", warni
 	return true
 
 
-## If [param arg] is [code]false[/code], the Logger will print an error message if [param warning]
+## If [param arg] is [code]true[/code], the Logger will print an error message if [param warning]
 ## is [code]false[/code], or a warning message if it is [code]true[/code]. If [param err_message] is
 ## empty, the displayed message will be a default one. Also, the name of the calling module can be
 ## passed in the [param module] parameter. It returns the negated value of [param arg].
 func fail(arg: bool, err_message: String = "", module: StringName = "", warning: bool = false) -> bool:
-	if not arg:
+	if arg:
 		if warning:
 			var msg: String = _DEFAULT_WARNING_MSG if err_message.is_empty() else err_message
 			Log.warning(msg, module)
