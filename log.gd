@@ -181,11 +181,13 @@ static func _static_init() -> void:
 	if _is_valid:
 		__get_settings()
 
-		if not DirAccess.dir_exists_absolute(_log_dir) and DirAccess.make_dir_recursive_absolute(_log_dir) != OK:
-			printerr("Log directory cannot be created.")
+		if _enable_file_logging:
+			if not DirAccess.dir_exists_absolute(_log_dir) and DirAccess.make_dir_recursive_absolute(_log_dir) != OK:
+				printerr("Log directory cannot be created.")
+
+			__remove_old_log_files()
 
 		OS.add_logger(Log.new())
-		__remove_old_log_files()
 	else:
 		printerr("Failed to open the log file.")
 
@@ -311,9 +313,6 @@ static func __create_log_file() -> FileAccess:
 
 
 static func __remove_old_log_files() -> void:
-	if not _enable_file_logging:
-		return
-
 	var max_log_files: int = ProjectSettings.get_setting("debug/file_logging/max_log_files")
 	var log_file_paths: Array[String]
 
