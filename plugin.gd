@@ -8,7 +8,7 @@ const SETTINGS_PREFIX: String = Log.SETTINGS_PREFIX
 
 func _enter_tree() -> void:
 	if not ProjectSettings.has_setting(SETTINGS_PREFIX + "output_level"):
-		ProjectSettings.set_setting(SETTINGS_PREFIX + "output_level", Log.Level.DEBUG)
+		ProjectSettings.set_setting(SETTINGS_PREFIX + "output_level", Log.LogLevel.DEBUG)
 	ProjectSettings.add_property_info(
 		{
 			name = SETTINGS_PREFIX + "output_level",
@@ -17,7 +17,7 @@ func _enter_tree() -> void:
 			hint_string = "Verbose,Debug,Info,Warning,Error,Critical,Muted"
 		}
 	)
-	ProjectSettings.set_initial_value(SETTINGS_PREFIX + "output_level", Log.Level.DEBUG)
+	ProjectSettings.set_initial_value(SETTINGS_PREFIX + "output_level", Log.LogLevel.DEBUG)
 
 	if not ProjectSettings.has_setting(SETTINGS_PREFIX + "print_backtrace"):
 		ProjectSettings.set_setting(SETTINGS_PREFIX + "print_backtrace", true)

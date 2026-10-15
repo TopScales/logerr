@@ -34,16 +34,16 @@ class LevelParams:
 		text_color = _text_color.to_html(false)
 
 
-enum Level {VERBOSE, DEBUG, INFO, WARNING, ERROR, CRITICAL, MUTED, FORCE_FLUSH}
+enum LogLevel {VERBOSE, DEBUG, INFO, WARNING, ERROR, CRITICAL, MUTED, FORCE_FLUSH}
 
 const SETTINGS_PREFIX: String = "addons/logerr/"
 
 const _LOG_EXTENSION: String = "log"
 const _MAX_BUFFER_SIZE: int = 10
 const _FLUSH_LEVELS: PackedByteArray = [
-	Level.ERROR,
-	Level.CRITICAL,
-	Level.FORCE_FLUSH,
+	LogLevel.ERROR,
+	LogLevel.CRITICAL,
+	LogLevel.FORCE_FLUSH,
 ]
 const _DEF_VERBOSE_TXT_COLOR: Color = Color.DARK_GRAY
 const _DEF_DEBUG_TAG_COLOR: Color = Color.TOMATO
@@ -60,7 +60,7 @@ const _MODULE: StringName = &"Log"
 const _PLATFORMS: PackedStringArray = ["pc", "android", "ios", "web"]
 
 #region Private Variables
-static var _level_strings: PackedStringArray = Level.keys()
+static var _level_strings: PackedStringArray = LogLevel.keys()
 static var _level_params: Array[LevelParams]
 static var _log_dir: String
 static var _log_file_template: String
@@ -70,7 +70,7 @@ static var _log_file: FileAccess
 static var _is_valid: bool
 static var _mutex: Mutex = Mutex.new()
 static var _modules: Dictionary[StringName, String]
-static var _level: Level
+static var _level: LogLevel
 static var _print_backtrace: bool
 static var _console: RichTextLabel
 static var _enable_file_logging: bool
@@ -87,10 +87,10 @@ static func set_console(console: RichTextLabel) -> void:
 
 ## Logs a verbose level message. Only logs if current level is VERBOSE.
 static func verbose(message: String, module: StringName = &"") -> void:
-	if not _is_valid or _level > Level.VERBOSE:
+	if not _is_valid or _level > LogLevel.VERBOSE:
 		return
 
-	var level: Level = Level.VERBOSE
+	var level: LogLevel = LogLevel.VERBOSE
 	var messages: Array[String] = __format_log_message(message, _level_params[level], module, false)
 	__add_message_to_file(messages[0], level)
 	__print_message(messages[1])
@@ -98,10 +98,10 @@ static func verbose(message: String, module: StringName = &"") -> void:
 
 ## Logs a debug level message. Only logs if current level is DEBUG or lower.
 static func debug(message: String, module: StringName = &"") -> void:
-	if not _is_valid or _level > Level.DEBUG:
+	if not _is_valid or _level > LogLevel.DEBUG:
 		return
 
-	var level: Level = Level.DEBUG
+	var level: LogLevel = LogLevel.DEBUG
 	var messages: Array[String] = __format_log_message(message, _level_params[level], module)
 	__add_message_to_file(messages[0], level)
 	__print_message(messages[1])
@@ -109,10 +109,10 @@ static func debug(message: String, module: StringName = &"") -> void:
 
 ## Logs an info level message. Only logs if current level is INFO or lower.
 static func info(message: String, module: StringName = &"") -> void:
-	if not _is_valid or _level > Level.INFO:
+	if not _is_valid or _level > LogLevel.INFO:
 		return
 
-	var level: Level = Level.INFO
+	var level: LogLevel = LogLevel.INFO
 	var messages: Array[String] = __format_log_message(message, _level_params[level], module)
 	__add_message_to_file(messages[0], level)
 	__print_message(messages[1])
@@ -120,10 +120,10 @@ static func info(message: String, module: StringName = &"") -> void:
 
 ## Logs a warning level message. Only logs if current level is WARNING or lower.
 static func warning(message: String, module: StringName = &"") -> void:
-	if not _is_valid or _level > Level.WARNING:
+	if not _is_valid or _level > LogLevel.WARNING:
 		return
 
-	var level: Level = Level.WARNING
+	var level: LogLevel = LogLevel.WARNING
 	var messages: Array[String] = __format_log_message(message, _level_params[level], module)
 	__add_message_to_file(messages[0], level)
 	__print_message(messages[1])
@@ -131,10 +131,10 @@ static func warning(message: String, module: StringName = &"") -> void:
 
 ## Logs an error level message. Only logs if current level is ERROR or lower.
 static func error(message: String, module: StringName = &"", err: int = -1) -> void:
-	if not _is_valid or _level > Level.ERROR:
+	if not _is_valid or _level > LogLevel.ERROR:
 		return
 
-	var level: Level = Level.ERROR
+	var level: LogLevel = LogLevel.ERROR
 	message = message if err <= OK else "%s (%d: %s)" % [message, err, error_string(err)]
 	var messages: Array[String] = __format_log_message(message, _level_params[level], module)
 	var script_backtraces: Array[ScriptBacktrace] = Engine.capture_script_backtraces()
@@ -146,10 +146,10 @@ static func error(message: String, module: StringName = &"", err: int = -1) -> v
 
 ## Logs a critical level message. Only logs if current level is CRITICAL or lower.
 static func critical(message: String, module: StringName = &"", err: int = -1) -> void:
-	if not _is_valid or _level > Level.CRITICAL:
+	if not _is_valid or _level > LogLevel.CRITICAL:
 		return
 
-	var level: Level = Level.CRITICAL
+	var level: LogLevel = LogLevel.CRITICAL
 	message = message if err <= OK else "%s (%d: %s)" % [message, err, error_string(err)]
 	var messages: Array[String] = __format_log_message(message, _level_params[level], module)
 	var script_backtraces: Array[ScriptBacktrace] = Engine.capture_script_backtraces()
@@ -161,7 +161,7 @@ static func critical(message: String, module: StringName = &"", err: int = -1) -
 
 ## Force file messages to flush the buffer to disk.
 static func force_flush() -> void:
-	__add_message_to_file("", Level.FORCE_FLUSH)
+	__add_message_to_file("", LogLevel.FORCE_FLUSH)
 
 
 # =============================================================
@@ -205,7 +205,7 @@ func _log_error(
 	if not _is_valid:
 		return
 
-	var level: Level = Level.WARNING if error_type == ERROR_TYPE_WARNING else Level.ERROR
+	var level: LogLevel = LogLevel.WARNING if error_type == ERROR_TYPE_WARNING else LogLevel.ERROR
 	var message := (
 		"[{time}] {level}: {rationale}\n{code}\n{file}:{line} @ {function}()"
 		.format(
@@ -220,7 +220,7 @@ func _log_error(
 			}
 		)
 	)
-	if level == Level.ERROR:
+	if level == LogLevel.ERROR:
 		message += "\n" + __get_gdscript_backtrace(script_backtraces)
 	__add_message_to_file(message, level)
 
@@ -229,7 +229,7 @@ func _log_message(message: String, log_message_error: bool) -> void:
 	if not _is_valid or message.begins_with("[lang=tlh]"):
 		return
 
-	var level: Level = Level.ERROR if log_message_error else Level.INFO
+	var level: LogLevel = LogLevel.ERROR if log_message_error else LogLevel.INFO
 	message = "[{time}] {level}: {message}".format(
 		{"time": Time.get_time_string_from_system(), "level": _level_strings[level], "message": message}
 	)
@@ -261,34 +261,34 @@ static func __get_enable_file_logging() -> void:
 
 
 static func __get_settings() -> void:
-	_level = ProjectSettings.get_setting(SETTINGS_PREFIX + "output_level", Level.DEBUG)
+	_level = ProjectSettings.get_setting(SETTINGS_PREFIX + "output_level", LogLevel.DEBUG)
 	@warning_ignore("return_value_discarded")
-	_level_params.resize(Level.CRITICAL + 1)
+	_level_params.resize(LogLevel.CRITICAL + 1)
 	var text_color: Color = ProjectSettings.get_setting(
 		SETTINGS_PREFIX + "colors/verbose_text_color", _DEF_VERBOSE_TXT_COLOR
 	)
-	var verbosep: LevelParams = LevelParams.new(_level_strings[Level.VERBOSE], Color.BLACK, text_color)
-	_level_params[Level.VERBOSE] = verbosep
+	var verbosep: LevelParams = LevelParams.new(_level_strings[LogLevel.VERBOSE], Color.BLACK, text_color)
+	_level_params[LogLevel.VERBOSE] = verbosep
 	var tag_color: Color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/debug_tag_color", _DEF_DEBUG_TAG_COLOR)
 	text_color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/debug_text_color", _DEF_DEBUG_TXT_COLOR)
-	var debugp: LevelParams = LevelParams.new(_level_strings[Level.DEBUG], tag_color, text_color)
-	_level_params[Level.DEBUG] = debugp
+	var debugp: LevelParams = LevelParams.new(_level_strings[LogLevel.DEBUG], tag_color, text_color)
+	_level_params[LogLevel.DEBUG] = debugp
 	tag_color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/info_tag_color", _DEF_INFO_TAG_COLOR)
 	text_color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/info_text_color", _DEF_INFO_TXT_COLOR)
-	var infop: LevelParams = LevelParams.new(_level_strings[Level.INFO], tag_color, text_color)
-	_level_params[Level.INFO] = infop
+	var infop: LevelParams = LevelParams.new(_level_strings[LogLevel.INFO], tag_color, text_color)
+	_level_params[LogLevel.INFO] = infop
 	tag_color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/info_tag_color", _DEF_WARN_TAG_COLOR)
 	text_color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/info_text_color", _DEF_WARN_TXT_COLOR)
-	var warnp: LevelParams = LevelParams.new(_level_strings[Level.WARNING], tag_color, text_color)
-	_level_params[Level.WARNING] = warnp
+	var warnp: LevelParams = LevelParams.new(_level_strings[LogLevel.WARNING], tag_color, text_color)
+	_level_params[LogLevel.WARNING] = warnp
 	tag_color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/info_tag_color", _DEF_ERROR_TAG_COLOR)
 	text_color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/info_text_color", _DEF_ERROR_TXT_COLOR)
-	var errorp: LevelParams = LevelParams.new(_level_strings[Level.ERROR], tag_color, text_color)
-	_level_params[Level.ERROR] = errorp
+	var errorp: LevelParams = LevelParams.new(_level_strings[LogLevel.ERROR], tag_color, text_color)
+	_level_params[LogLevel.ERROR] = errorp
 	tag_color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/info_tag_color", _DEF_CRITICAL_TAG_COLOR)
 	text_color = ProjectSettings.get_setting(SETTINGS_PREFIX + "colors/info_text_color", _DEF_CRITICAL_TXT_COLOR)
-	var criticalp: LevelParams = LevelParams.new(_level_strings[Level.CRITICAL], tag_color, text_color)
-	_level_params[Level.CRITICAL] = criticalp
+	var criticalp: LevelParams = LevelParams.new(_level_strings[LogLevel.CRITICAL], tag_color, text_color)
+	_level_params[LogLevel.CRITICAL] = criticalp
 	_print_backtrace = ProjectSettings.get_setting(SETTINGS_PREFIX + "print_backtrace", true)
 
 
@@ -364,7 +364,7 @@ static func __print_message(message: String) -> void:
 		_console.append_text(message)
 
 
-static func __add_message_to_file(message: String, level: Level) -> void:
+static func __add_message_to_file(message: String, level: LogLevel) -> void:
 	if not _enable_file_logging:
 		return
 
